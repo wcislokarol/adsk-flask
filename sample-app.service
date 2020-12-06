@@ -1,0 +1,14 @@
+[Unit]
+Description=My nice service
+After=network-online.target
+
+[Service]
+Type=simple
+User=ec2-user
+ExecStart=/opt/sample-flask-app/env/bin/python -m flask run --host=0.0.0.0
+Environment="FLASK_APP=app.py"
+RootDirectory=/opt/sample-flask-app
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

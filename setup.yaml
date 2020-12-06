@@ -1,0 +1,46 @@
+---
+- hosts: app_nodes 
+  become: yes 
+  vars: 
+    EPEL_RPM_URL: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    PYTHON_DEP: 
+      - python3
+    APP_ARTIFACT: /home/211313/students-apps/sample.app.zip 
+  tasks: 
+    - name: "install epel"
+      yum: 
+        name: "{{ EPEL_RPM_URL }}"
+        state: present 
+    - name: "install py3"
+      yum: 
+        name: "{{ PYTHON_DEP }}"
+        state: present 
+    - name: "copy source code"
+      copy: 
+        src: "{{ APP_ARTIFACT }}"
+        dest: "/tmp/sample-app.zip"
+    - name: "unarchive"
+      unarchive: 
+        src: "/tmp/sample-app.zip"
+        dest: "/opt"
+        remote_src: yes
+    - name: "install dep in venv"
+      pip: 
+        requirements: /opt/sample-flask-app/requirements.txt 
+        virtualenv: /opt/sample-flask-app/.venv 
+        virtualenv_command: python3 -m venv
+    - name: "put systemd app config"
+      copy: 
+        src: files/sample-app.service 
+        dest: etc/systemd/system/sample-app.service
+    - name: "restart my app" 
+      systemd: 
+        name: sample-app
+        daemon_reload: yes 
+        state: restarted
+        enabled: yes 
+
+
+#
+# install python
+#
